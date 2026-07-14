@@ -3,11 +3,19 @@ name: Update Alfresco Global Properties
 
 on:
   workflow_dispatch:
-     # When this file is updated
+    inputs:
+      environment:
+        description: 'Select Target Deployment Environment'
+        required: true
+        default: 'Development'
+        type: choice
+        options:
+          - Development
+          - Staging
 
 jobs:
   update-file:
-    runs-on: self-hosted
+    runs-on: [self-hosted, "${{ inputs.environment == 'Development' && 'MyPC-1' || inputs.environment == 'Staging' && 'IBM-PC' }}"]
 
     steps:
       - name: Checkout
@@ -17,19 +25,29 @@ jobs:
           sparse-checkout-cone-mode: false # Fixes the "not a directory" error
           sparse-checkout: 'config/alfresco-global.properties'
 
+       # 📁 Step 1: Dynamically determine and export the correct target path
+      - name: Resolve Environment Configuration
+        id: config
+        shell: bash # Bash is native to the GitHub Actions runner wrapper for exporting variables
+        run: |
+          if [ "${{ inputs.environment }}" = "Development" ]; then
+             echo "TARGET_PATH=D:\Work\JBR\Code\ACS Target\assumedTarget\\" >> $GITHUB_ENV
+             echo "SCRIPT_PATH=D:\Work\JBR\Code\ACS Target\scripts\\" >> $GITHUB_ENV
+          elif [ "${{ inputs.environment }}" = "Staging" ]; then
+             echo "TARGET_PATH=C:\Work\ACS\Taarget\\" >> $GITHUB_ENV
+             echo "SCRIPT_PATH=C:\Work\ACS\Scripts\\" >> $GITHUB_ENV
+
       - name: Copy File to Target Dir
         shell: cmd
         run: |
-          if not exist "D:\Work\JBR\Code\ACS Target\assumedTarget\" mkdir "D:\Work\JBR\Code\ACS Target\assumedTarget\"
-          xcopy "config\alfresco-global.properties" "D:\Work\JBR\Code\ACS Target\assumedTarget\" /Y
-
-          if not exist "D:\Work\JBR\Code\ACS Target\assumedTarget\" mkdir "D:\Work\JBR\Code\ACS Target\assumedTarget\"
-      
-          if exist "config\1alfresco-global.properties" (
-            xcopy "config\alfresco-global.properties" "D:\Work\JBR\Code\ACS Target\assumedTarget\" /Y
-            echo File copied successfully.
+          echo Deploying to target path: "%TARGET_PATH%"
+          
+          if not exist "%TARGET_PATH%" mkdir "%TARGET_PATH%"
+          
+          if exist "config\alfresco-global.properties" (
+              xcopy "config\alfresco-global.properties" "%TARGET_PATH%" /Y
           ) else (
-            echo WARNING: config/alfresco-global.properties was not found in the repository checkout!
+              echo ERROR: Properties file not found in repo checkout! && exit 1
           )
       
      #   shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
@@ -44,4 +62,6 @@ jobs:
       - name: Run Success Message
         shell: cmd
         run: |
-          call "D:\Work\JBR\Code\ACS Target\scripts\startup.bat"
+          echo Executing startup script from: "%SCRIPT_PATH%"
+          cd /d "%SCRIPT_PATH%"
+          call startup.bat
