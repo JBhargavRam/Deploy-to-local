@@ -12,10 +12,36 @@ on:
         options:
           - Development
           - Staging
+          - UAT
 
 jobs:
+  # 📋 Job 1: Maps your selected environment to a list of target runner labels
+  setup-matrix:
+    runs-on: windows-latest
+    outputs:
+      servers: ${{ steps.set-servers.outputs.servers }}
+    steps:
+      - id: set-servers
+        shell: bash # Safe to run bash here as 'windows-latest' is a GitHub-hosted runner
+        run: |
+          if [ "${{ inputs.environment }}" = "Development" ]; then
+             echo 'servers=["MyPC-1"]' >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.environment }}" = "Staging" ]; then
+             echo 'servers=["IBM-PC"]' >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.environment }}" = "UAT" ]; then
+             echo 'servers=["UAT-1", "UAT-2"]' >> $GITHUB_OUTPUT
+          fi
+   # runs-on: [self-hosted, "${{ inputs.environment == 'Development' && 'MyPC-1' || inputs.environment == 'Staging' && 'IBM-PC'  || inputs.environment == 'UAT' && 'UAT-1'}}"]
+
   update-file:
-    runs-on: [self-hosted, "${{ inputs.environment == 'Development' && 'MyPC-1' || inputs.environment == 'Staging' && 'IBM-PC' }}"]
+    needs: setup-matrix
+    strategy:
+      fail-fast: false 
+      matrix:
+        server: ${{ fromJson(needs.setup-matrix.outputs.servers) }}
+        
+    # 🚀 Targets each specific physical machine instance in parallel
+    runs-on: [self-hosted, "${{ matrix.server }}"]
 
     steps:
       - name: Checkout
@@ -38,6 +64,10 @@ jobs:
              echo TARGET_PATH=C:\Work\ACS\Target\>> %GITHUB_ENV%
              echo SCRIPT_PATH=C:\Work\ACS\Scripts\>> %GITHUB_ENV%
           )
+          if "${{ inputs.environment }}"=="UAT" (
+             echo TARGET_PATH=C:\Work\ACS\${{ matrix.server }}\>> %GITHUB_ENV%
+             echo SCRIPT_PATH=C:\Work\ACS\Scripts\>> %GITHUB_ENV%
+          )
 
       # 🔒 Step 3: Map and inject exactly two secrets
       - name: Inject Secrets into Properties File
@@ -47,11 +77,14 @@ jobs:
           if "${{ inputs.environment }}"=="Development" (
               set "ENV_DB_PASS=${{ secrets.DEV_DB_PASSWORD }}"
               set "ENV_SHARED_SECRET=${{ secrets.DEV_SOLR_SHARED_SECRET }}"
-          ) else (
+          ) elif "${{ inputs.environment }}"=="Staging" (
               set "ENV_DB_PASS=${{ secrets.STAGING_DB_PASSWORD }}"
               set "ENV_SHARED_SECRET=${{ secrets.STAGING_SOLR_SHARED_SECRET }}"
+          ) else (
+              set "ENV_DB_PASS=${{ secrets.UAT_DB_PASSWORD }}"
+              set "ENV_SHARED_SECRET=${{ secrets.UAT_SOLR_SHARED_SECRET }}"
           )
-
+          
           :: 2. Replace the DB placeholder
           powershell -Command "(Get-Content 'config/alfresco-global.properties') -replace '__DB_PASSWORD_PLACEHOLDER__', '%ENV_DB_PASS%' | Set-Content 'config/alfresco-global.properties'"
           
