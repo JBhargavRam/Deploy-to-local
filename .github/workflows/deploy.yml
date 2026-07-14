@@ -121,3 +121,24 @@ jobs:
           echo Executing startup script from: "%SCRIPT_PATH%"
           cd /d "%SCRIPT_PATH%"
           call startup.bat
+
+          
+   # ✨ JOB 3: Runs ON ANOTHER SET OF SERVERS exclusively during UAT
+  uat-Tx-deployment:
+    needs: update-file # Wait for primary deployment to finish first
+    # 🎯 Only run this job if the user selected UAT
+    if: ${{ inputs.environment == 'UAT' }} 
+    runs-on: [self-hosted, 'UAT-Tx'] 
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          sparse-checkout-cone-mode: false # Fixes the "not a directory" error
+          sparse-checkout: 'config/Tx.config'
+          
+      - name: Copy File to Target Dir
+        shell: cmd
+        run: |
+          xcopy "config\Tx.config" "C:\Work\ACS\UAT-Tx\" /Y
