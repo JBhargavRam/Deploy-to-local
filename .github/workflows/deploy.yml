@@ -13,8 +13,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          sparse-checkout: 'config/alfresco-global.properties'
           sparse-checkout-cone-mode: false # Fixes the "not a directory" error
+          sparse-checkout: 'config/alfresco-global.properties'
 
       - name: Copy File to Target Dir
         run: |
