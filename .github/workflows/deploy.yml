@@ -3,11 +3,7 @@ name: Update Alfresco Global Properties
 
 on:
   workflow_dispatch:
-    
-  push:
-    branches: [main]
-    paths:
-      - 'config/alfresco-global.properties'  # When this file is updated
+     # When this file is updated
 
 jobs:
   update-file:
