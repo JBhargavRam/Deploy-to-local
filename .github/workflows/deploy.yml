@@ -7,7 +7,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'alfresco-global.properties'  # When this file is updated
+      - 'config/alfresco-global.properties'  # When this file is updated
 
 jobs:
   update-file:
@@ -22,7 +22,7 @@ jobs:
       - name: Copy File to Target Dir
         run: |
           # init
-          $sourceFile = "./alfresco-global.properties"
+          $sourceFile = "config/alfresco-global.properties"
           $targetPath = "D:\Work\JBR\Code\ACS Target\assumedTarget\"
 
           Copy-Item -Path $sourceFile -Destination $targetPath -Force
