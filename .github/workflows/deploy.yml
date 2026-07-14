@@ -17,14 +17,19 @@ jobs:
           sparse-checkout: 'config/alfresco-global.properties'
 
       - name: Copy File to Target Dir
-        shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
+        shell: cmd
         run: |
+          if not exist "D:\Work\JBR\Code\ACS Target\assumedTarget\" mkdir "D:\Work\JBR\Code\ACS Target\assumedTarget\"
+          xcopy "config\alfresco-global.properties" "D:\Work\JBR\Code\ACS Target\assumedTarget\" /Y
+      
+     #   shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
+     #   run: |
           # init
-          $sourceFile = "config/alfresco-global.properties"
-          $targetPath = "D:\Work\JBR\Code\ACS Target\assumedTarget\"
+     #     $sourceFile = "config/alfresco-global.properties"
+     #     $targetPath = "D:\Work\JBR\Code\ACS Target\assumedTarget\"
 
-          Copy-Item -Path $sourceFile -Destination $targetPath -Force
-          Write-Host "File Config Updated"
+      #    Copy-Item -Path $sourceFile -Destination $targetPath -Force
+       #   Write-Host "File Config Updated"
 
       - name: Run Success Message
         shell: cmd
