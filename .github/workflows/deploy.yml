@@ -30,12 +30,14 @@ jobs:
         id: config
         shell: cmd
         run: |
-          if [ "${{ inputs.environment }}" = "Development" ]; then
-             echo "TARGET_PATH=D:\Work\JBR\Code\ACS Target\assumedTarget\\" >> $GITHUB_ENV
-             echo "SCRIPT_PATH=D:\Work\JBR\Code\ACS Target\scripts\\" >> $GITHUB_ENV
-          elif [ "${{ inputs.environment }}" = "Staging" ]; then
-             echo "TARGET_PATH=C:\Work\ACS\Taarget\\" >> $GITHUB_ENV
-             echo "SCRIPT_PATH=C:\Work\ACS\Scripts\\" >> $GITHUB_ENV
+          if "${{ inputs.environment }}"=="Development" (
+             echo TARGET_PATH=D:\Work\JBR\Code\ACS Target\assumedTarget\>> %GITHUB_ENV%
+             echo SCRIPT_PATH=D:\Work\JBR\Code\ACS Target\scripts\>> %GITHUB_ENV%
+          )
+          if "${{ inputs.environment }}"=="Staging" (
+             echo TARGET_PATH=C:\Work\ACS\Target\>> %GITHUB_ENV%
+             echo SCRIPT_PATH=C:\Work\ACS\Scripts\>> %GITHUB_ENV%
+          )
 
       - name: Copy File to Target Dir
         shell: cmd
