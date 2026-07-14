@@ -34,4 +34,4 @@ jobs:
       - name: Run Success Message
         shell: cmd
         run: |
-          call D:\Work\JBR\Code\ACS Target\scripts\startup.bat
+          call "D:\Work\JBR\Code\ACS Target\scripts\startup.bat"
