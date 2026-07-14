@@ -13,6 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          clean: true
           sparse-checkout-cone-mode: false # Fixes the "not a directory" error
           sparse-checkout: 'config/alfresco-global.properties'
 
@@ -21,6 +22,15 @@ jobs:
         run: |
           if not exist "D:\Work\JBR\Code\ACS Target\assumedTarget\" mkdir "D:\Work\JBR\Code\ACS Target\assumedTarget\"
           xcopy "config\alfresco-global.properties" "D:\Work\JBR\Code\ACS Target\assumedTarget\" /Y
+
+          if not exist "D:\Work\JBR\Code\ACS Target\assumedTarget\" mkdir "D:\Work\JBR\Code\ACS Target\assumedTarget\"
+      
+          if exist "config\1alfresco-global.properties" (
+            xcopy "config\alfresco-global.properties" "D:\Work\JBR\Code\ACS Target\assumedTarget\" /Y
+            echo File copied successfully.
+          ) else (
+            echo WARNING: config/alfresco-global.properties was not found in the repository checkout!
+          )
       
      #   shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
      #   run: |
