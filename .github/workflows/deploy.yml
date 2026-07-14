@@ -39,6 +39,25 @@ jobs:
              echo SCRIPT_PATH=C:\Work\ACS\Scripts\>> %GITHUB_ENV%
           )
 
+      # 🔒 Step 3: Map and inject exactly two secrets
+      - name: Inject Secrets into Properties File
+        shell: cmd
+        run: |
+          :: 1. Pick the correct environment passwords and load them into local variables
+          if "${{ inputs.environment }}"=="Development" (
+              set "ENV_DB_PASS=${{ secrets.DEV_DB_PASSWORD }}"
+              set "ENV_SHARED_SECRET=${{ secrets.DEV_SOLR_SHARED_SECRET }}"
+          ) else (
+              set "ENV_DB_PASS=${{ secrets.STAGING_DB_PASSWORD }}"
+              set "ENV_SHARED_SECRET=${{ secrets.STAGING_SOLR_SHARED_SECRET }}"
+          )
+
+          :: 2. Replace the DB placeholder
+          powershell -Command "(Get-Content 'config/alfresco-global.properties') -replace '__DB_PASSWORD_PLACEHOLDER__', '%ENV_DB_PASS%' | Set-Content 'config/alfresco-global.properties'"
+          
+          :: 3. Replace the Shared Secret placeholder
+          powershell -Command "(Get-Content 'config/alfresco-global.properties') -replace '__SOLR_SHARED_SECRET__', '%ENV_SHARED_SECRET%' | Set-Content 'config/alfresco-global.properties'"
+
       - name: Copy File to Target Dir
         shell: cmd
         run: |
