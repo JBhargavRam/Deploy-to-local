@@ -28,7 +28,7 @@ jobs:
        # 📁 Step 1: Dynamically determine and export the correct target path
       - name: Resolve Environment Configuration
         id: config
-        shell: bash # Bash is native to the GitHub Actions runner wrapper for exporting variables
+        shell: cmd
         run: |
           if [ "${{ inputs.environment }}" = "Development" ]; then
              echo "TARGET_PATH=D:\Work\JBR\Code\ACS Target\assumedTarget\\" >> $GITHUB_ENV
