@@ -77,10 +77,12 @@ jobs:
           if "${{ inputs.environment }}"=="Development" (
               set "ENV_DB_PASS=${{ secrets.DEV_DB_PASSWORD }}"
               set "ENV_SHARED_SECRET=${{ secrets.DEV_SOLR_SHARED_SECRET }}"
-          ) elif "${{ inputs.environment }}"=="Staging" (
+          ) 
+          if "${{ inputs.environment }}"=="Staging" (
               set "ENV_DB_PASS=${{ secrets.STAGING_DB_PASSWORD }}"
               set "ENV_SHARED_SECRET=${{ secrets.STAGING_SOLR_SHARED_SECRET }}"
-          ) else (
+          ) 
+          if "${{ inputs.environment }}"=="UAT" (
               set "ENV_DB_PASS=${{ secrets.UAT_DB_PASSWORD }}"
               set "ENV_SHARED_SECRET=${{ secrets.UAT_SOLR_SHARED_SECRET }}"
           )
