@@ -22,7 +22,7 @@ jobs:
       - name: Copy File to Target Dir
         run: |
           # init
-          $sourceFile = "alfresco-global.properties"
+          $sourceFile = "./alfresco-global.properties"
           $targetPath = "D:\Work\JBR\Code\ACS Target\assumedTarget\"
 
           Copy-Item -Path $sourceFile -Destination $targetPath -Force
